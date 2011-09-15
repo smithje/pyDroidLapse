@@ -8,7 +8,6 @@ import pickle
 WAIT_TIME=90
 PICTURE_PATH="/sdcard/pyTimeLapse/"
 PICTURE_NAME="tl%Y%m%d_%H%M%S.jpg"
-PICTURE_GLOB="tl[0-9][0-9][0-9][0-9][0-9][0-9].jpg"
 LOCATION_FILE_NAME="locations_%s.pkl"
 
 
@@ -37,6 +36,9 @@ class TimeLapse(object):
         Returns a tuple of (lat, long)
         Return (None, None) if no location can be found
         """
+        if not self.locating:
+            self.droid.startLocating()
+            self.locating = True
         location_attempt = 1
         location = {}
         result = {}
@@ -59,8 +61,9 @@ class TimeLapse(object):
         return location
     
     def stopLocating(self):
-        self.droid.stopLocating()
-        self.locating = False
+        if self.locating is True:
+            self.droid.stopLocating()
+            self.locating = False
     
     
     def saveGeoData(self, location, picture_file):
@@ -68,9 +71,6 @@ class TimeLapse(object):
         Save the entire dictionary of geo data into a pickle file
         The key is the image name
         """
-        if not self.locating:
-            self.droid.startLocating()
-            self.locating = True
         key = os.path.basename(picture_file)
         pickle_file = os.path.join(self.picture_directory, LOCATION_FILE_NAME % os.path.basename(self.picture_directory))
         if os.path.exists(pickle_file):
@@ -80,6 +80,7 @@ class TimeLapse(object):
         else:
             locations = {}
         locations[key] = location
+        # Save to a temporary file first, then rename it
         temp_pickle = pickle_file + ".tmp"
         f = open(temp_pickle, 'wb')
         pickle.dump(locations, f)
@@ -87,16 +88,17 @@ class TimeLapse(object):
         os.rename(temp_pickle, pickle_file)
     
     def is_plugged_in(self):
+        """Determine if the phone is plugged in"""
         self.droid.batteryStartMonitoring()
         plug_type = self.droid.batteryGetPlugType().result
         if plug_type>=1:
             return True
         else:
-            print "Unplugged"
             return False
         self.droid.batteryStopMonitoring()
     
     def main(self):
+        # Create the directory to store the files
         if not os.path.isdir(self.picture_directory):
             os.mkdir(self.picture_directory)
     
@@ -105,10 +107,10 @@ class TimeLapse(object):
                 if not self.only_capture_when_plugged_in or (self.only_capture_when_plugged_in and self.is_plugged_in()):
                     now = datetime.datetime.utcnow()
                     picture_file = os.path.join(self.picture_directory, now.strftime(PICTURE_NAME))
+                    # Take a picture auto-focus is set to True
                     self.droid.cameraCapturePicture(picture_file, True)
                     if self.geotag is True:
                         location = self.getLocation()
-                        print location
                         self.saveGeoData(location, picture_file)
                 else:
                     if self.geotag is True:
