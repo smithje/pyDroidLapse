@@ -1,0 +1,40 @@
+     This is a very simple piece of software which I used to take a photo every
+90 seconds on my drive across the country.  There are plenty of other android
+time lapse software packages out there and I would encourage you to look at 
+those as well.  I wrote decided to write my own for the following reasons:
+
+1) I wanted the time lapse to run in the background as much as possible so I
+could keep my map or music or audio book or whatever application in the 
+foreground.  The whole point of a time lapse app is that it is hands free, 
+so I certainly don't need to be looking at it.
+
+2) I wanted to tag the location.  This didn't work out as well as I had planned.
+I couldn't find a pure python library that would edit the exif tags of the images.
+Instead, I used the pretty lame solution of just pickling the locations into a 
+separate file.  I could then use something like exiftool to stick the locations back
+into the pictures.
+
+3) I wanted to be able to turn it off and on easily for when I put my phone in my pocket
+or just didn't want to take photos.  I settled on having the app only take a photo
+if the phone is plugged in.
+
+
+     I used this for a ~3600 mile drive on my Droid X and car dock and it worked quite well.
+When the camera takes a picture, a preview image shows up on the screen which is both 
+distorted and rotated.  The image saved to the disk is fine, though.  Also, the shutter
+sound fires every time.  It's exceptionally obnoxious and it also cuts into anything else
+your phone is currently playing.  I wish I could get have gotten rid of that.
+
+
+
+INSTALLATION:
+     This requires SL4A (http://code.google.com/p/android-scripting/) and the python interpreter.
+
+     After those are installed, just copy the script over to the scripts directory on the android sdcard.
+This generally involves mounting the sdcard to a computer and copying the script over.
+
+
+FUTURE WORK:
+  - I'd love to get rid of the shutter sound, but this will be pretty difficult.
+  - The wait time between pictures could be changed via a simple gui quite easily.
+  - Allow the user to choose whether photos are taken when unplugged or not.
